@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ulice Novog Sada — ličnosti, događaji i institucije</title>
+<style>
+  :root{
+    --bg:#0f1720; --card:#182430; --card2:#1e2c3a; --accent:#e0a458;
+    --accent2:#7fb2d9; --text:#e8edf2; --muted:#9fb0bf; --line:#2a3a49;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    background:linear-gradient(160deg,#0f1720,#131e29);
+    color:var(--text); line-height:1.6; padding:0 0 60px;
+  }
+  header{
+    padding:48px 24px 32px; text-align:center;
+    border-bottom:1px solid var(--line);
+    background:radial-gradient(ellipse at top,#1c2a38,transparent 70%);
+  }
+  header h1{font-size:1.9rem;font-weight:700;letter-spacing:.3px}
+  header h1 span{color:var(--accent)}
+  header p{color:var(--muted);margin-top:10px;max-width:660px;margin-inline:auto;font-size:.98rem}
+  .hint{margin-top:14px;font-size:.82rem;color:var(--accent2)}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px}
+  .controls{
+    position:sticky;top:0;z-index:20;
+    background:rgba(15,23,32,.92);backdrop-filter:blur(8px);
+    padding:18px 20px;border-bottom:1px solid var(--line);
+    display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;
+  }
+  .search-wrap{position:relative;flex:1;min-width:220px;max-width:420px;display:flex}
+  #search{
+    flex:1;width:100%;
+    padding:11px 40px 11px 16px;border-radius:10px;border:1px solid var(--line);
+    background:var(--card);color:var(--text);font-size:1rem;
+  }
+  #search:focus{outline:none;border-color:var(--accent)}
+  #clearBtn{
+    position:absolute;right:6px;top:50%;transform:translateY(-50%);
+    display:none;border:none;background:var(--card2);color:var(--muted);
+    width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:.85rem;line-height:1;
+  }
+  #clearBtn:hover{background:var(--accent);color:#1a1206}
+  #clearBtn.show{display:block}
+  .count{color:var(--muted);font-size:.9rem}
+  .section-title{
+    margin:38px 0 4px;font-size:1.25rem;color:var(--accent);
+    border-left:3px solid var(--accent);padding-left:12px;
+  }
+  .section-title.toggle{cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between}
+  .section-title .chev{font-size:.85rem;transition:transform .2s;margin-left:10px}
+  .section-title.collapsed .chev{transform:rotate(-90deg)}
+  .grid.hidden{display:none}
+  .section-sub{color:var(--muted);font-size:.9rem;margin-bottom:18px;padding-left:15px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:20px;transition:.18s;
+  }
+  .card:hover{transform:translateY(-3px);border-color:var(--accent2);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+  .card h3{font-size:1.12rem;color:var(--accent);margin-bottom:2px}
+  .card .years{font-size:.82rem;color:var(--accent2);margin-bottom:10px;font-weight:600}
+  .card p{color:var(--text);font-size:.94rem}
+  .card .role{
+    display:inline-block;font-size:.75rem;color:var(--muted);
+    background:var(--card2);padding:4px 10px;border-radius:20px;border:1px solid var(--line);
+  }
+  .card-foot{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    margin-top:14px;flex-wrap:wrap;
+  }
+  .card-foot:only-child,.geo .card-foot{justify-content:flex-end}
+  .map-link{
+    font-size:.78rem;color:var(--accent);text-decoration:none;
+    background:rgba(224,164,88,.12);border:1px solid var(--accent);
+    padding:4px 12px;border-radius:20px;white-space:nowrap;transition:.15s;
+  }
+  .map-link:hover{background:var(--accent);color:#1a1206}
+  .geo p{color:var(--muted)}
+  /* pojam (glossary term) */
+  .term{
+    color:var(--accent2);border-bottom:1px dotted var(--accent2);
+    cursor:pointer;font-weight:600;
+  }
+  .term:hover{color:var(--accent);border-color:var(--accent)}
+  .no-results{text-align:center;color:var(--muted);padding:40px;display:none}
+  footer{text-align:center;color:var(--muted);font-size:.82rem;margin-top:40px;padding:0 20px}
+  /* modal */
+  .overlay{
+    display:none;position:fixed;inset:0;z-index:100;
+    background:rgba(6,10,14,.75);backdrop-filter:blur(4px);
+    align-items:center;justify-content:center;padding:20px;
+  }
+  .overlay.open{display:flex}
+  .modal{
+    background:var(--card2);border:1px solid var(--accent2);border-radius:16px;
+    max-width:520px;width:100%;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.6);
+    animation:pop .18s ease;
+  }
+  @keyframes pop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
+  .modal h4{color:var(--accent);font-size:1.3rem;margin-bottom:4px}
+  .modal .m-year{color:var(--accent2);font-size:.85rem;font-weight:600;margin-bottom:14px}
+  .modal p{font-size:.98rem;color:var(--text)}
+  .modal button{
+    margin-top:20px;background:var(--accent);color:#1a1206;border:none;
+    padding:10px 20px;border-radius:8px;font-weight:600;cursor:pointer;font-size:.95rem;
+  }
+  .modal button:hover{filter:brightness(1.1)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Ulice <span>Novog Sada</span></h1>
+  <p>Ko su ljudi po kojima su nazvane ulice grada, a plavo podvučene reči (događaji, bitke, institucije) klikni da vidiš objašnjenje. Svaka kartica ima i dugme 📍 Mapa koje otvara tačnu lokaciju ulice.</p>
+  <div class="hint">💡 Klikni na bilo koji <span class="term" style="cursor:default">pojam</span> u tekstu za kratko objašnjenje.</div>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <input id="search" type="text" placeholder="Pretraži ulicu ili ime…" autocomplete="off">
+    <button id="clearBtn" type="button" aria-label="Obriši pretragu">✕</button>
+  </div>
+  <span class="count" id="count"></span>
+</div>
+
+<div class="wrap">
+  <h2 class="section-title toggle" data-target="peopleGrid">Ulice nazvane po ličnostima <span class="chev">▾</span></h2>
+  <p class="section-sub">Znamenite osobe iz srpske i svetske istorije, kulture i nauke.</p>
+  <div class="grid" id="peopleGrid"></div>
+
+  <h2 class="section-title toggle" id="geoTitle" data-target="geoGrid">Ulice s geografskim i drugim nazivima <span class="chev">▾</span></h2>
+  <p class="section-sub">Nazvane po mestima, predelima ili pojmovima — ne po osobama.</p>
+  <div class="grid geo" id="geoGrid"></div>
+
+  <div class="no-results" id="noRes">Nema rezultata za tu pretragu.</div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h4 id="mTitle"></h4>
+    <div class="m-year" id="mYear"></div>
+    <p id="mBody"></p>
+    <button id="closeBtn">Zatvori</button>
+  </div>
+</div>
+
+<footer>
+  Sadržaj je informativnog karaktera. Sve ulice su proverene prema zvaničnom indeksu ulica Novog Sada; lokacije na mapi otvaraju pretragu na OpenStreetMap-u. Nazivi se ponekad menjaju — proveri aktuelno stanje kod nadležnih službi.
+</footer>
+
+<script>
+/* ---- POJMOVNIK: događaji, bitke, institucije ---- */
+const glossary = {
+  "kosovski-boj":{t:"Kosovski boj",y:"28. jun 1389.",d:"Bitka na Kosovu polju između srpske vojske kneza Lazara i Osmanskog carstva sultana Murata I. Obe vojske pretrpele su velike gubitke, poginuli su i Lazar i Murat. Bitka je postala centralni događaj srpskog nacionalnog mita i epske tradicije."},
+  "dusanov-zakonik":{t:"Dušanov zakonik",y:"1349. i 1354.",d:"Zbornik zakona cara Stefana Dušana, jedan od najvažnijih pravnih spomenika srednjovekovne Srbije i Evrope. Uređivao je državu, crkvu, sudstvo i prava staleža."},
+  "slovo-ljubve":{t:"„Slovo ljubve“",y:"početak 15. veka",d:"Pesnička poslanica despota Stefana Lazarevića, ispisana u obliku akrostiha. Smatra se jednim od najlepših dela stare srpske književnosti, posvećeno ljubavi i pomirenju."},
+  "snp":{t:"Srpsko narodno pozorište (SNP)",y:"osnovano 1861.",d:"Najstarije profesionalno pozorište kod Srba, osnovano u Novom Sadu na inicijativu Jovana Đorđevića. I danas je jedna od vodećih pozorišnih kuća u Srbiji."},
+  "matica-srpska":{t:"Matica srpska",y:"osnovana 1826.",d:"Najstarija srpska kulturna i naučna ustanova, osnovana u Pešti, a od 1864. u Novom Sadu. Bavi se izdavaštvom, naukom i očuvanjem srpske kulture; poseduje veliku biblioteku."},
+  "zastava":{t:"List „Zastava“",y:"1866–1929.",d:"Uticajne srpske novine koje su izlazile u Novom Sadu, glasilo Srpske narodne slobodoumne stranke. Uređivali su ih Svetozar Miletić, a kasnije Jaša Tomić."},
+  "majska-skupstina":{t:"Majska skupština",y:"13–15. maj 1848.",d:"Sabor Srba u Sremskim Karlovcima tokom revolucionarne 1848, na kojem je proglašena Srpska Vojvodina kao autonomna oblast u Austrijskom carstvu. Za vojvodu je izabran Stevan Šupljikac, a za patrijarha Josif Rajačić."},
+  "solunski-front":{t:"Solunski front",y:"1915–1918.",d:"Ratište u Prvom svetskom ratu na jugu Balkana. Proboj Solunskog fronta 1918. doveo je do oslobođenja Srbije i sloma Centralnih sila; srpska vojska je predvodila napad."},
+  "kolubarska-bitka":{t:"Kolubarska bitka",y:"novembar–decembar 1914.",d:"Velika pobeda srpske vojske nad Austrougarskom u Prvom svetskom ratu, kojom je komandovao vojvoda Živojin Mišić. Neprijatelj je potpuno proteran iz Srbije."},
+  "cerska-bitka":{t:"Cerska bitka",y:"avgust 1914.",d:"Prva saveznička pobeda u Prvom svetskom ratu, na planini Cer. Srpskom vojskom komandovao je Stepa Stepanović, koji je za tu pobedu unapređen u čin vojvode."},
+  "velika-nar-skupstina":{t:"Velika narodna skupština 1918.",y:"25. novembar 1918.",d:"Skupština u Novom Sadu koja je izglasala prisajedinjenje Banata, Bačke i Baranje Kraljevini Srbiji, neposredno pred stvaranje Kraljevine SHS."},
+  "sutjeska":{t:"Bitka na Sutjesci",y:"maj–jun 1943.",d:"Jedna od najvećih bitaka partizanskog pokreta u Drugom svetskom ratu (nem. operacija „Schwarz“). Partizani su se uz teške gubitke probili iz okruženja; tu je poginuo Sava Kovačević."},
+  "narodni-heroj":{t:"Orden narodnog heroja",y:"od 1942.",d:"Najviše odlikovanje socijalističke Jugoslavije, dodeljivano za izuzetnu hrabrost u Narodnooslobodilačkoj borbi tokom Drugog svetskog rata."},
+  "gorski-vijenac":{t:"„Gorski vijenac“",y:"1847.",d:"Spev Petra II Petrovića Njegoša, jedno od najznačajnijih dela srpske i crnogorske književnosti; spaja istoriju, filozofiju i narodni duh."},
+  "onjegin":{t:"„Evgenije Onjegin“",y:"1833.",d:"Roman u stihovima Aleksandra Puškina, remek-delo ruske književnosti i jedan od temelja modernog ruskog jezika."},
+  "mrtve-duse":{t:"„Mrtve duše“",y:"1842.",d:"Satirični roman Nikolaja Gogolja o ruskom društvu i korupciji, jedno od najuticajnijih dela ruske proze."},
+  "politika":{t:"List „Politika“",y:"osnovan 1904.",d:"Najstariji dnevni list na Balkanu koji i danas izlazi, osnovao ga je Vladislav Ribnikar u Beogradu."},
+  "boze-pravde":{t:"„Bože pravde“",y:"1872.",d:"Srpska himna; tekst je napisao Jovan Đorđević, a muziku Davorin Jenko. Danas je državna himna Republike Srbije."},
+  "velika-seoba":{t:"Velika seoba Srba",y:"1690.",d:"Masovno preseljenje Srba pod patrijarhom Arsenijem III Čarnojevićem iz osmanskih u habzburške zemlje. Zauzvrat su Srbi dobili crkvenu i kulturnu autonomiju (Privilegije)."},
+  "prvi-sv-rat":{t:"Prvi svetski rat",y:"1914–1918.",d:"Svetski sukob u kojem je Srbija, iako mala, odigrala značajnu ulogu i pretrpela ogromne gubitke, ali na kraju bila na pobedničkoj strani."},
+  "kalemovi":{t:"Pupinovi kalemovi",y:"patent 1900.",d:"Zavojnice (induktori) koje se ugrađuju duž telefonskih vodova da smanje slabljenje signala. Pupinov pronalazak omogućio je telefoniju na velike razdaljine i doneo mu bogatstvo."},
+  "sana":{t:"SANU",y:"koreni od 1841.",d:"Srpska akademija nauka i umetnosti, najviša naučna i umetnička ustanova u Srbiji."},
+  "gorski-red":{t:"Red Zmaja",y:"osnovan 1408.",d:"Viteški red koji je osnovao ugarski kralj Žigmund; despot Stefan Lazarević bio je jedan od njegovih članova, po čemu je i dobio pridevak „zmaj“."},
+  "cojstvo":{t:"„Primjeri čojstva i junaštva“",y:"1901.",d:"Zbirka kratkih priča Marka Miljanova o moralu, časti i hrabrosti — njegovo najpoznatije delo."},
+  "santa-maria":{t:"„Santa Maria della Salute“",y:"1909.",d:"Ljubavna pesma Laze Kostića posvećena Lenki Dunđerski, nazvana po venecijanskoj crkvi. Smatra se jednom od najlepših pesama srpske književnosti."},
+  "prosvetiteljstvo":{t:"Prosvetiteljstvo",y:"18. vek",d:"Evropski intelektualni pokret koji je isticao razum, obrazovanje i nauku nasuprot praznoverju. Dositej Obradović je te ideje preneo u srpsku kulturu."},
+  "vuk":{t:"Vukova reforma jezika",y:"početak 19. veka",d:"Reforma kojom je Vuk Karadžić uveo narodni govor kao književni jezik i fonetski pravopis („piši kao što govoriš, čitaj kao što je napisano“). Prvo je nailazila na otpor, a kasnije je postala osnova savremenog srpskog jezika."},
+  "soc-realizam":{t:"Socijalistički realizam",y:"od 1930-ih",d:"Umetnički pravac, zvanično u SSSR-u, koji prikazuje život radničke klase i ideje socijalizma na realističan, optimističan način. Maksim Gorki se smatra njegovim utemeljivačem u književnosti."},
+  "komedija":{t:"„Ljudska komedija“",y:"1829–1848.",d:"Ogroman ciklus od oko 90 povezanih romana i priča Onorea de Balzaka koji slikaju francusko društvo. Temelj evropskog književnog realizma."},
+  "heliocentrizam":{t:"Heliocentrični sistem",y:"1543.",d:"Model svemira u kojem je Sunce u središtu, a Zemlja i planete se okreću oko njega. Kopernik ga je izneo u delu „O kretanjima nebeskih sfera“, čime je počela naučna revolucija."},
+  "epika":{t:"Srpska epska poezija",y:"srednji vek–19. vek",d:"Narodne junačke pesme koje se prenose usmeno i pevaju uz gusle. Opevaju vladare i junake (Marka Kraljevića, kosovske junake); Vuk Karadžić ih je prvi sistematski zapisao."},
+  "epska-poezija":{t:"Epska poezija",y:"—",d:"Narodne junačke pesme koje opevaju istorijske i legendarne junake, prenošene usmeno uz gusle."},
+  "nobel":{t:"Nobelova nagrada za književnost",y:"od 1901.",d:"Najprestižnije svetsko priznanje za književnost, koje dodeljuje Švedska akademija. Ivo Andrić ju je dobio 1961. za roman „Na Drini ćuprija“ i celokupno delo."},
+  "djulici":{t:"„Đulići“ i „Đulići uveoci“",y:"1864. i 1882.",d:"Dve zbirke pesama Jovana Jovanovića Zmaja: prva slavi porodičnu sreću i ljubav, a druga (uveoci = uveli cvetovi) je dirljiv tužbalica za preminulom ženom i decom."},
+  "plavi-cuperak":{t:"„Plavi čuperak“",y:"1965.",d:"Najpoznatija zbirka poezije Miroslava Antića, o dečačkoj ljubavi i odrastanju. Generacije su na njoj odrastale; jedna od najčitanijih srpskih pesničkih knjiga."},
+  "rukoveti":{t:"„Rukoveti“",y:"1883–1909.",d:"Petnaest horskih kompozicija Stevana Mokranjca u kojima je umetnički obradio narodne pesme iz raznih krajeva. Temelj srpske horske muzike."},
+  "naizmenicna-struja":{t:"Naizmenična struja (AC)",y:"kraj 19. veka",d:"Sistem prenosa električne energije koji menja smer mnogo puta u sekundi, što omogućava prenos na velike daljine. Teslin sistem pobedio je u „ratu struja“ i danas napaja svet."},
+  "milankovic-ciklusi":{t:"Milankovićevi ciklusi",y:"1920-e",d:"Teorija Milutina Milankovića koja objašnjava ledena doba periodičnim promenama u kretanju Zemlje oko Sunca. Danas je temelj razumevanja klimatskih promena kroz istoriju."},
+  "balkanski-ratovi":{t:"Balkanski ratovi",y:"1912–1913.",d:"Dva rata u kojima su balkanske države oslobodile teritorije od Osmanskog carstva, a potom se sukobile oko podele. Srbija je znatno proširila teritoriju."},
+  "prvi-ustanak":{t:"Prvi srpski ustanak",y:"1804–1813.",d:"Ustanak Srba protiv osmanske vlasti pod vođstvom Karađorđa Petrovića. Prva faza srpske revolucije koja je vodila stvaranju moderne srpske države."},
+  "seca-knezova":{t:"Seča knezova",y:"januar 1804.",d:"Pogubljenje viđenijih srpskih knezova i vođa koje su sprovele dahije, plašeći se pobune. Umesto da uguši otpor, izazvala je Bunu na dahije i Prvi srpski ustanak."},
+};
+
+/* ---- LIČNOSTI ---- opisi koriste [term:kljuc|prikazani tekst] za pojmove ---- */
+const people = [
+  {u:"Bulevar Mihajla Pupina", n:"Mihajlo Pupin", y:"1854–1935", r:"Naučnik",
+   d:"Srpsko-američki fizičar i pronalazač rođen u Idvoru. Zaslužan za [term:kalemovi|Pupinove kalemove] koji su omogućili telefonski prenos na velike daljine; imao je preko 30 patenata i bio jedan od osnivača preteče NASA-e."},
+  {u:"Bulevar cara Lazara", n:"Car Lazar Hrebeljanović", y:"oko 1329–1389", r:"Vladar",
+   d:"Srpski knez koji je predvodio vojsku u [term:kosovski-boj|Kosovskom boju] 1389. protiv Osmanlija, gde je poginuo. Središnja figura kosovskog mita i srpske srednjovekovne tradicije."},
+  {u:"Bulevar Jaše Tomića", n:"Jaša Tomić", y:"1856–1922", r:"Političar i novinar",
+   d:"Srpski novinar i političar, urednik lista [term:zastava|„Zastava“] i naslednik Svetozara Miletića u Radikalnoj stranci. Bio je jedan od najuglednijih Srba na [term:velika-nar-skupstina|Velikoj narodnoj skupštini] 1918."},
+  {u:"Bulevar despota Stefana", n:"Despot Stefan Lazarević", y:"1377–1427", r:"Vladar i pisac",
+   d:"Sin cara Lazara, vladar Srbije i član [term:gorski-red|Reda Zmaja]. Uz državničku ulogu bio je i pesnik — autor poslanice [term:slovo-ljubve|„Slovo ljubve“]."},
+  {u:"Bulevar kralja Petra I", n:"Kralj Petar I Karađorđević", y:"1844–1921", r:"Vladar",
+   d:"Kralj Srbije od 1903. i prvi kralj Kraljevine SHS. Vladavina mu se pamti kao „zlatno doba“ srpske demokratije; lično je učestvovao u [term:prvi-sv-rat|Prvom svetskom ratu]."},
+  {u:"Bulevar Slobodana Jovanovića", n:"Slobodan Jovanović", y:"1869–1958", r:"Pravnik i istoričar",
+   d:"Jedan od najznačajnijih srpskih pravnika, istoričara i kritičara, rektor Beogradskog univerziteta i predsednik [term:sana|SANU]. U Drugom svetskom ratu bio predsednik izbegličke vlade."},
+  {u:"Zmaj Jovina", n:"Jovan Jovanović Zmaj", y:"1833–1904", r:"Pesnik i lekar",
+   d:"Jedan od najvoljenijih srpskih pesnika, po struci lekar, dugo živeo u Novom Sadu. Poznat po dečjoj poeziji („Čika Jova Zmaj“) i zbirkama [term:djulici|„Đulići“] i „Đulići uveoci“ posvećenim porodici. Ova ulica je glavna pešačka zona grada."},
+  {u:"Njegoševa", n:"Petar II Petrović Njegoš", y:"1813–1851", r:"Vladika i pesnik",
+   d:"Crnogorski vladika i jedan od najvećih pesnika srpskog jezika. Autor speva [term:gorski-vijenac|„Gorski vijenac“], „Luče mikrokozma“ i „Lažnog cara Šćepana Malog“."},
+  {u:"Svetozara Miletića", n:"Svetozar Miletić", y:"1826–1901", r:"Političar i pravnik", alt:"Miletićeva",
+   d:"Vođa srpskog nacionalnog pokreta u Ugarskoj, gradonačelnik Novog Sada i urednik lista [term:zastava|„Zastava“]. Njegov spomenik dominira Trgom slobode; tast je Jaše Tomića. (kolokvijalno „Miletićeva“)"},
+  {u:"Nikole Pašića", n:"Nikola Pašić", y:"1845–1926", r:"Državnik", alt:"Pašićeva",
+   d:"Najuticajniji srpski političar s prelaza 19. u 20. vek, višestruki premijer Srbije i Kraljevine SHS, vođa Radikalne stranke i ključna figura u stvaranju Jugoslavije. (kolokvijalno „Pašićeva“)"},
+  {u:"Cara Dušana", n:"Car Stefan Dušan (Silni)", y:"1308–1355", r:"Vladar",
+   d:"Najmoćniji srpski srednjovekovni vladar, koji je Srbiju uzdigao na carstvo. Donosilac [term:dusanov-zakonik|Dušanovog zakonika], jednog od najznačajnijih pravnih spomenika."},
+  {u:"Laze Telečkog", n:"Laza Telečki", y:"1841–1873", r:"Glumac",
+   d:"Jedan od prvih velikih glumaca [term:snp|Srpskog narodnog pozorišta]. Ova malena ulica danas je poznata kafanska i izlazna zona grada."},
+  {u:"Ilije Ognjanovića", n:"Ilija Ognjanović Abukazem", y:"1845–1900", r:"Lekar i književnik",
+   d:"Novosadski lekar, književnik i urednik, saradnik Zmaja i aktivan učesnik kulturnog života grada 19. veka."},
+  {u:"Petra Drapšina", n:"Petar Drapšin", y:"1914–1945", r:"General",
+   d:"Partizanski general iz Drugog svetskog rata, komandant u završnim operacijama za oslobođenje Jugoslavije."},
+  {u:"Gogoljeva", n:"Nikolaj Gogolj", y:"1809–1852", r:"Pisac",
+   d:"Ruski književnik rođen u Ukrajini, jedan od utemeljivača ruske proze. Autor romana [term:mrtve-duse|„Mrtve duše“], komedije „Revizor“ i pripovetke „Šinjel“."},
+  {u:"Puškinova", n:"Aleksandar Sergejevič Puškin", y:"1799–1837", r:"Pesnik",
+   d:"Najveći ruski pesnik i utemeljivač modernog ruskog jezika. Autor romana u stihovima [term:onjegin|„Evgenije Onjegin“]; poginuo u dvoboju."},
+  {u:"Braće Ribnikar", n:"Braća Ribnikar", y:"19–20. vek", r:"Novinari",
+   d:"Porodica značajna u srpskom novinarstvu — Vladislav Ribnikar bio je osnivač lista [term:politika|„Politika“] 1904."},
+  {u:"Kralja Aleksandra", n:"Kralj Aleksandar I Karađorđević", y:"1888–1934", r:"Vladar",
+   d:"Kralj Jugoslavije, „Ujedinitelj“; uveo je diktaturu 1929. i preimenovao državu u Kraljevinu Jugoslaviju. Ubijen u atentatu u Marseju."},
+  {u:"Šafarikova", n:"Pavel Jozef Šafarik", y:"1795–1861", r:"Naučnik",
+   d:"Slovački i češki filolog i slavista, utemeljivač slavistike. Jedno vreme je bio profesor i direktor srpske gimnazije u Novom Sadu."},
+  {u:"Trg Marije Trandafil", n:"Marija Trandafil", y:"1816–1883", r:"Dobrotvorka",
+   d:"Novosadska dobrotvorka koja je celokupno bogatstvo zaveštala srpskim ustanovama i siročadi; jedna od najvećih zadužbinarki u istoriji grada."},
+  {u:"Vase Stajića", n:"Vasa Stajić", y:"1878–1947", r:"Istoričar i pedagog",
+   d:"Srpski istoričar i filozof, predsednik [term:matica-srpska|Matice srpske] posle Drugog svetskog rata; veliki hroničar prošlosti Novog Sada."},
+  {u:"Ise Bajića", n:"Isidor Bajić", y:"1878–1915", r:"Kompozitor",
+   d:"Srpski kompozitor i muzički pedagog iz Novog Sada, osnivač muzičke škole koja i danas nosi njegovo ime. Autor prve srpske operete i opere „Knez Ivo od Semberije“, te brojnih horskih i klavirskih dela."},
+  {u:"Jovana Đorđevića", n:"Jovan Đorđević", y:"1826–1900", r:"Književnik",
+   d:"Pisac teksta srpske himne [term:boze-pravde|„Bože pravde“] i osnivač [term:snp|Srpskog narodnog pozorišta] u Novom Sadu 1861."},
+  {u:"Heroja Pinkija", n:"Janko Čmelik „Pinki“", y:"1905–1942", r:"Narodni heroj",
+   d:"Predratni revolucionar i [term:narodni-heroj|narodni heroj], streljan 1942. Po njemu je dugo nosio ime gradski stadion."},
+  {u:"Doža Đerđa", n:"Doža Đerđ (György Dózsa)", y:"oko 1470–1514", r:"Vođa bune",
+   d:"Vođa velike seljačke bune 1514. u tadašnjoj Ugarskoj protiv plemstva; surovo pogubljen. Simbol otpora tlačenju."},
+  {u:"Bulevar patrijarha Pavla", n:"Patrijarh Pavle", y:"1914–2009", r:"Poglavar SPC",
+   d:"Srpski patrijarh od 1990. do 2009, poznat po skromnosti i asketskom životu; jedna od najpoštovanijih ličnosti u novijoj srpskoj istoriji."},
+  {u:"Save Kovačevića", n:"Sava Kovačević", y:"1905–1943", r:"Narodni heroj",
+   d:"Partizanski komandant i [term:narodni-heroj|narodni heroj], poginuo u [term:sutjeska|bici na Sutjesci] 1943."},
+  {u:"Slobodana Bajića", n:"Slobodan Bajić Paja", y:"1916–1943", r:"Narodni heroj",
+   d:"Revolucionar i [term:narodni-heroj|narodni heroj] iz Vojvodine, poginuo u Drugom svetskom ratu."},
+  {u:"Marka Miljanova", n:"Marko Miljanov", y:"1833–1901", r:"Vojvoda i pisac",
+   d:"Crnogorski vojvoda koji se opismenio tek u poznim godinama i postao pisac; poznat po delu [term:cojstvo|„Primjeri čojstva i junaštva“]."},
+  {u:"Bulevar vojvode Stepe", n:"Stepa Stepanović", y:"1856–1929", r:"Vojskovođa",
+   d:"Srpski vojvoda, jedini koji je čin vojvode dobio na bojnom polju u [term:cerska-bitka|Cerskoj bici] 1914."},
+  {u:"Laze Kostića", n:"Laza Kostić", y:"1841–1910", r:"Pesnik",
+   d:"Jedan od najvećih srpskih pesnika romantizma, član [term:matica-srpska|Matice srpske]. Autor pesme [term:santa-maria|„Santa Maria della Salute“], koja se smatra vrhuncem srpske ljubavne lirike."},
+  {u:"Dositejeva", n:"Dositej Obradović", y:"1739–1811", r:"Prosvetitelj",
+   d:"Prvi srpski prosvetitelj i reformator, začetnik moderne srpske književnosti i prvi ministar prosvete u ustaničkoj Srbiji. Širio je ideje [term:prosvetiteljstvo|prosvetiteljstva] među Srbima."},
+  {u:"Jovana Cvijića", n:"Jovan Cvijić", y:"1865–1927", r:"Geograf",
+   d:"Najznačajniji srpski geograf, osnivač srpske geografske škole i predsednik [term:sana|SANU]. Svetski priznat po proučavanju krša (kraških pojava) i naseljavanja Balkana."},
+  {u:"Tekelijina", n:"Sava Tekelija", y:"1761–1842", r:"Dobrotvor i pravnik",
+   d:"Prvi Srbin doktor prava, veliki dobrotvor i predsednik [term:matica-srpska|Matice srpske]. Osnovao je Tekelijanum — zadužbinu za školovanje siromašnih srpskih đaka u Pešti."},
+  {u:"Laze Dunđerskog", n:"Lazar Dunđerski", y:"1833–1917", r:"Industrijalac",
+   d:"Najbogatiji srpski industrijalac i veleposednik svog doba u Vojvodini, veliki mecena kulture i dobrotvor [term:matica-srpska|Matice srpske] i srpskih ustanova."},
+  {u:"Đure Jakšića", n:"Đura Jakšić", y:"1832–1878", r:"Pesnik i slikar",
+   d:"Istaknuti srpski pesnik, pripovedač i slikar romantizma. Poznat po rodoljubivim pesmama („Otadžbina“, „Ponoć“), drami „Jelisaveta“ i istorijskim slikama; jedna od najstrastvenijih ličnosti srpskog romantizma."},
+  {u:"Branka Radičevića", n:"Branko Radičević", y:"1824–1853", r:"Pesnik",
+   d:"Prvi veliki pesnik reformisanog srpskog jezika [term:vuk|Vuka Karadžića] i rodonačelnik srpskog romantizma. Umro mlad; sahranjen je na Stražilovu na Fruškoj gori."},
+  {u:"Kornelija Stankovića", n:"Kornelije Stanković", y:"1831–1865", r:"Kompozitor",
+   d:"Prvi srpski školovani kompozitor i melograf. Prvi je notno zapisao srpsko crkveno pojanje i harmonizovao narodne melodije, postavljajući temelje srpske umetničke muzike; komponovao je i „Pesme za glas i klavir“."},
+  {u:"Maksima Gorkog", n:"Maksim Gorki", y:"1868–1936", r:"Pisac",
+   d:"Ruski pisac i utemeljivač [term:soc-realizam|socijalističkog realizma]. Između dva rata ova ulica se zvala „Cara Nikolaja“; povezuje Bulevar oslobođenja sa Dunavom."},
+  {u:"Balzakova", n:"Onore de Balzak", y:"1799–1850", r:"Pisac",
+   d:"Francuski romanopisac, jedan od tvoraca evropskog realizma. Autor ciklusa romana [term:komedija|„Ljudska komedija“] koji slika francusko društvo 19. veka."},
+  {u:"Ćirpanova", n:"Radivoj Ćirpanov", y:"1909–1941", r:"Narodni heroj",
+   d:"Obućarski radnik iz Čuruga i komunistički revolucionar, sekretar Mesnog komiteta KPJ u Novom Sadu i [term:narodni-heroj|narodni heroj Jugoslavije]. Poginuo je 1941. u borbi protiv okupatora."},
+  {u:"Modene", n:"po gradu Modena (Italija)", y:"—", r:"Toponim",
+   d:"Nazvana po italijanskom gradu Modeni u pokrajini Emilija-Romanja, poznatom po arkadama, Ferariju i balzamiko sirćetu. Veza je prijateljstvo gradova — u Modeni postoji trg koji nosi ime Novog Sada. Jedna od najstarijih i najlepših ulica u jezgru grada, poznata po svodovima."},
+  {u:"Ljermontova", n:"Mihail Ljermontov", y:"1814–1841", r:"Pesnik",
+   d:"Ruski pesnik i pisac, jedan od najvećih posle Puškina. Autor romana „Junak našeg doba“ i poeme „Demon“; poginuo u dvoboju sa svega 26 godina."},
+  {u:"Kopernikova", n:"Nikola Kopernik", y:"1473–1543", r:"Astronom",
+   d:"Poljski astronom koji je postavio [term:heliocentrizam|heliocentrični model] — da se Zemlja i planete okreću oko Sunca, čime je pokrenuo naučnu revoluciju."},
+  {u:"Luja Braja", n:"Luj Braj (Louis Braille)", y:"1809–1852", r:"Pronalazač",
+   d:"Francuski pronalazač Brajevog pisma — sistema tačaka koji slepim i slabovidim osobama omogućava čitanje i pisanje dodirom."},
+  {u:"Kraljevića Marka", n:"Kraljević Marko", y:"oko 1335–1395", r:"Vladar i junak",
+   d:"Srpski srednjovekovni vladar koji je postao najpopularniji junak srpske i balkanske [term:epika|epske poezije], simbol snage i pravde."},
+  {u:"Jug Bogdana", n:"Jug Bogdan", y:"legendarni lik", r:"Epski junak",
+   d:"Legendarni junak srpske epske poezije, otac devet Jugovića, koji po predanju gine sa sinovima u [term:kosovski-boj|Kosovskom boju]."},
+  {u:"Gundulićeva", n:"Ivan Gundulić", y:"1589–1638", r:"Pesnik",
+   d:"Dubrovački barokni pesnik, autor epa „Osman“. Slavljen kao pesnik koji je pevao o slobodi i jedinstvu južnoslovenskih naroda."},
+  {u:"Laze Lazarevića", n:"Laza Lazarević", y:"1851–1891", r:"Pisac i lekar",
+   d:"Srpski pripovedač i lekar, začetnik psihološke pripovetke u srpskoj književnosti. Poznat po pričama „Prvi put s ocem na jutrenje“, „Sve će to narod pozlatiti“ i „Školska ikona“."},
+  {u:"Sterijina", n:"Jovan Sterija Popović", y:"1806–1856", r:"Komediograf",
+   d:"Najveći srpski komediograf i jedan od osnivača srpske drame. Autor komedija „Kir Janja“ (Tvrdica), „Pokondirena tikva“ i „Rodoljupci“; pokrenuo osnivanje Matice i narodnog muzeja."},
+  {u:"Trifkovićev trg", n:"Kosta Trifković", y:"1843–1875", r:"Komediograf",
+   d:"Novosadski pisac i jedan od najboljih komediografa svog doba. Pisao je vedre komedije o građanskom životu u Vojvodini; najpoznatija je „Izbiračica“. Po njemu je nazvan trg u centru grada."},
+  {u:"Branka Ćopića", n:"Branko Ćopić", y:"1915–1984", r:"Pisac",
+   d:"Jedan od najčitanijih srpskih pisaca 20. veka, poznat po toploj i duhovitoj prozi. Autor romana „Orlovi rano lete“, „Ježeva kućica“ i „Doživljaji Nikoletine Bursaća“."},
+  {u:"Miroslava Antića", n:"Miroslav Mika Antić", y:"1932–1986", r:"Pesnik",
+   d:"Voljeni novosadski pesnik, novinar i slikar. Najpoznatiji po zbirci [term:plavi-cuperak|„Plavi čuperak“] i „Garavi sokak“, poeziji o detinjstvu, ljubavi i odrastanju."},
+  {u:"Petra Kočića", n:"Petar Kočić", y:"1877–1916", r:"Pisac",
+   d:"Srpski pisac i borac za prava naroda u Bosni pod Austrougarskom. Poznat po satiri „Jazavac pred sudom“ i pripovetkama o krajiškom seljaku i prirodi."},
+  {u:"Stevana Sremca", n:"Stevan Sremac", y:"1855–1906", r:"Pisac",
+   d:"Jedan od najduhovitijih srpskih pripovedača. Autor romana „Zona Zamfirova“, „Ivkova slava“ i „Pop Ćira i pop Spira“, punih humora i lokalnog kolorita."},
+  {u:"Stevana Mokranjca", n:"Stevan Mokranjac", y:"1856–1914", r:"Kompozitor",
+   d:"Najznačajniji srpski kompozitor 19. veka. Poznat po [term:rukoveti|„Rukovetima“] — obradama narodnih pesama za hor — i po zapisivanju srpskog crkvenog pojanja."},
+  {u:"Konstantina Danila", n:"Konstantin Danil", y:"1798–1873", r:"Slikar",
+   d:"Jedan od najvećih srpskih slikara bidermajera i klasicizma, poznat po portretima i ikonostasima u crkvama širom Vojvodine."},
+  {u:"Uroša Predića", n:"Uroš Predić", y:"1857–1953", r:"Slikar",
+   d:"Jedan od najvećih srpskih realističkih slikara. Autor čuvenih slika „Vesela braća“, „Siroče na majčinom grobu“ i „Kosovka devojka“."},
+  {u:"Paje Jovanovića", n:"Paja Jovanović", y:"1859–1957", r:"Slikar",
+   d:"Vodeći srpski slikar realizma, svetski priznat po velikim istorijskim kompozicijama „Seoba Srba“, „Krunisanje cara Dušana“ i orijentalnim scenama."},
+  {u:"Nikole Tesle", n:"Nikola Tesla", y:"1856–1943", r:"Naučnik i pronalazač",
+   d:"Srpsko-američki pronalazač i inženjer, tvorac sistema [term:naizmenicna-struja|naizmenične struje] koji danas napaja svet. Imao je preko 300 patenata (indukcioni motor, Teslin transformator, bežični prenos)."},
+  {u:"Milutina Milankovića", n:"Milutin Milanković", y:"1879–1958", r:"Naučnik",
+   d:"Srpski matematičar, astronom i inženjer, član [term:sana|SANU]. Svetski poznat po [term:milankovic-ciklusi|Milankovićevim ciklusima] koji objašnjavaju ledena doba, i po reformi kalendara."},
+  {u:"Mihaila Petrovića Alasa", n:"Mihailo Petrović Alas", y:"1868–1943", r:"Matematičar",
+   d:"Utemeljivač srpske matematičke škole, izumitelj i strastveni ribolovac (otud „Alas“). Bio je i učitelj mnogih srpskih naučnika i putnik oko sveta."},
+  {u:"Josifa Pančića", n:"Josif Pančić", y:"1814–1888", r:"Botaničar",
+   d:"Otac srpske botanike i prvi predsednik Srpske kraljevske akademije. Otkrio je četinar pančićevu omoriku; po njemu je nazvan i vrh Pančićev vršak na Kopaoniku."},
+  {u:"Milice Stojadinović Srpkinje", n:"Milica Stojadinović Srpkinja", y:"1828–1878", r:"Pesnikinja",
+   d:"Jedna od prvih srpskih pesnikinja, slavljena u svoje doba kao „vrbnička vila“. Pisala je rodoljubivu i lirsku poeziju i dnevnik „U Fruškoj gori“."},
+  {u:"Katarine Ivanović", n:"Katarina Ivanović", y:"1811–1882", r:"Slikarka",
+   d:"Prva srpska akademska slikarka i prva žena članica Srpskog učenog društva (preteče SANU). Slikala je portrete, istorijske i mrtve prirode."},
+  {u:"Mileve Marić", n:"Mileva Marić", y:"1875–1948", r:"Matematičarka i fizičarka",
+   d:"Srpska matematičarka i fizičarka rođena u Titelu, jedna od prvih žena studenata fizike u Evropi; prva supruga Alberta Ajnštajna i sagovornik u ranim godinama njegovih istraživanja."},
+  {u:"Save Šumanovića", n:"Sava Šumanović", y:"1896–1942", r:"Slikar",
+   d:"Jedan od najvećih srpskih slikara 20. veka, poznat po delu „Šid“ i „Doručak na travi“. Streljan u Sremskoj Mitrovici 1942; u Šidu postoji galerija s njegovim delima."},
+  {u:"Đorđa Rajkovića", n:"Đorđe Rajković", y:"1825–1886", r:"Književnik",
+   d:"Srpski književnik, pedagog i sakupljač narodnih umotvorina koji je živeo i radio u Novom Sadu u 19. veku."},
+
+  {u:"Pere Dobrinovića", n:"Pera Dobrinović", y:"1853–1923", r:"Glumac",
+   d:"Najveći srpski glumac svog doba, „čarobnjak koji je na sceni mogao sve“, član [term:snp|Srpskog narodnog pozorišta]. Prvi glumac kome je u Jugoslaviji podignut spomenik — stoji ispred nove zgrade SNP-a."},
+  {u:"Draginje Ružić", n:"Draginja Ružić", y:"1834–1905", r:"Glumica",
+   d:"Prva srpska profesionalna glumica, članica [term:snp|Srpskog narodnog pozorišta] od 1861. Odigrala je oko 350 uloga i mogla je da tumači likove svih fahova."},
+  {u:"Mite Ružića", n:"Dimitrije Mita Ružić", y:"1841–1912", r:"Glumac i upravnik",
+   d:"Jedan od najvećih dramskih glumaca u istoriji srpskog pozorišta, reditelj i dugogodišnji upravnik [term:snp|Srpskog narodnog pozorišta]. Suprug glumice Draginje Ružić."},
+  {u:"Mire Stupice", n:"Mira Stupica", y:"1923–2016", r:"Glumica",
+   d:"Jedna od najvećih srpskih glumica 20. veka, poznata po ulogama u pozorištu i filmu, dobitnica brojnih nagrada za životno delo."},
+  {u:"Milene Dravić", n:"Milena Dravić", y:"1940–2018", r:"Glumica",
+   d:"Jedna od najpopularnijih i najvoljenijih glumica jugoslovenskog filma, sa preko 100 uloga. Osvojila je nagradu u Kanu i bila zaštitno lice domaće kinematografije."},
+  {u:"Olivere Marković", n:"Olivera Marković", y:"1925–2011", r:"Glumica",
+   d:"Istaknuta srpska pozorišna i filmska glumica i pevačica, upamćena po nizu uloga u klasicima jugoslovenskog filma."},
+  {u:"Olje Ivanjicki", n:"Olja Ivanjicki", y:"1931–2009", r:"Slikarka",
+   d:"Svestrana srpska slikarka, vajarka i pesnikinja, jedna od najistaknutijih figura srpske umetnosti 20. veka, poznata po vizionarskom i nadrealnom stilu."},
+  {u:"Nadežde Petrović", n:"Nadežda Petrović", y:"1873–1915", r:"Slikarka",
+   d:"Najznačajnija srpska slikarka i pionir modernog slikarstva kod Srba, začetnica srpskog ekspresionizma i impresionizma. Umrla kao bolničarka u [term:prvi-sv-rat|Prvom svetskom ratu]."},
+  {u:"Stevana Aleksića", n:"Stevan Aleksić", y:"1876–1923", r:"Slikar",
+   d:"Srpski slikar bidermajera i realizma, poznat po crkvenim kompozicijama, ikonostasima i autoportretima u romantičnom duhu."},
+  {u:"Marije Bursać", n:"Marija Bursać", y:"1920–1943", r:"Narodna heroina",
+   d:"Prva žena proglašena za [term:narodni-heroj|narodnog heroja Jugoslavije] (1943). Poginula je od posledica ranjavanja pri jurišu na neprijateljske bunkere; Branko Ćopić joj je posvetio pesmu „Marija na Prkosima“."},
+  {u:"Sonje Marinković", n:"Sonja Marinković", y:"1916–1941", r:"Narodna heroina",
+   d:"Revolucionarka i [term:narodni-heroj|narodni heroj], druga žena odlikovana tim ordenom. Streljana je 1941; ostala upamćena po prkosnim poslednjim rečima pred streljačkim strojem."},
+  {u:"Janka Čmelika", n:"Janko Čmelik", y:"1905–1942", r:"Narodni heroj",
+   d:"Slovački revolucionar iz Vojvodine i [term:narodni-heroj|narodni heroj], jedan od prvih petoro heroja iz Vojvodine. Isti čovek kao „Pinki“ po kome se zove i ulica Heroja Pinkija."},
+  {u:"Stanka Paunovića", n:"Stanko Paunović Veljko", y:"1912–1942", r:"Narodni heroj",
+   d:"Radnički pokretaš i [term:narodni-heroj|narodni heroj] iz Vojvodine, jedan od prvih petoro proglašenih heroja ovog kraja 1943."},
+  {u:"Milunke Savić", n:"Milunka Savić", y:"1890–1973", r:"Ratnica, heroina",
+   d:"Najodlikovanija žena u istoriji ratovanja. Borila se u [term:balkanski-ratovi|Balkanskim ratovima] i [term:prvi-sv-rat|Prvom svetskom ratu], nosilac Karađorđeve zvezde i francuske Legije časti."},
+  {u:"Miloša Crnjanskog", n:"Miloš Crnjanski", y:"1893–1977", r:"Pisac",
+   d:"Jedan od najvećih srpskih pisaca 20. veka, tvorac „sumatraizma“. Autor „Seoba“, „Dnevnika o Čarnojeviću“ i „Romana o Londonu“."},
+  {u:"Isidore Sekulić", n:"Isidora Sekulić", y:"1877–1958", r:"Književnica",
+   d:"Prva žena članica [term:sana|SANU]. Književnica, esejistkinja i prevodilac; poznata po delu „Pisma iz Norveške“ i „Zapisi o mom narodu“."},
+  {u:"Milovana Vidakovića", n:"Milovan Vidaković", y:"1780–1841", r:"Pisac",
+   d:"Utemeljivač srpskog romana; njegovi popularni romani s početka 19. veka opismenjavali su i zabavljali srpsku građansku publiku."},
+  {u:"Milete Jakšića", n:"Mileta Jakšić", y:"1863–1935", r:"Pesnik",
+   d:"Srpski pesnik i sveštenik, sinovac Đure Jakšića, poznat po tihoj, melanholičnoj poeziji o vojvođanskom selu i prirodi."},
+  {u:"Todora Manojlovića", n:"Todor Manojlović", y:"1883–1968", r:"Pisac",
+   d:"Srpski pesnik, dramski pisac i likovni kritičar, jedan od začetnika modernizma u srpskoj književnosti između dva rata."},
+  {u:"Jovana Popovića", n:"Jovan Popović", y:"1905–1952", r:"Pisac",
+   d:"Srpski pesnik i pripovedač iz Vojvodine, jedan od vodećih pisaca socijalne literature između dva svetska rata."},
+  {u:"Josifa Marinkovića", n:"Josif Marinković", y:"1851–1931", r:"Kompozitor",
+   d:"Jedan od najznačajnijih srpskih kompozitora, poznat po horskim delima i solo-pesmama; savremenik Stevana Mokranjca."},
+  {u:"Stevana Hristića", n:"Stevan Hristić", y:"1885–1958", r:"Kompozitor",
+   d:"Srpski kompozitor i dirigent, autor baleta „Ohridska legenda“, jednog od najizvođenijih dela srpske klasične muzike."},
+  {u:"Milana Konjovića", n:"Milan Konjović", y:"1898–1993", r:"Slikar",
+   d:"Jedan od najvećih srpskih kolorista 20. veka iz Sombora, poznat po snažnim, ekspresivnim pejzažima Vojvodine. Za sobom je ostavio hiljade dela."},
+  {u:"Marije Kiri", n:"Marija Kiri (Marie Curie)", y:"1867–1934", r:"Naučnica",
+   d:"Poljsko-francuska fizičarka i hemičarka, jedina osoba s [term:nobel|Nobelovom nagradom] u dve različite nauke (fizika i hemija). Otkrila elemente polonijum i radijum."},
+  {u:"Ruđera Boškovića", n:"Ruđer Bošković", y:"1711–1787", r:"Naučnik",
+   d:"Dubrovački fizičar, astronom i matematičar, tvorac rane atomske teorije. Jedan od najvećih naučnika svog doba, prethodnik moderne fizike."},
+  {u:"Milana Jovanovića Batuta", n:"Milan Jovanović Batut", y:"1847–1940", r:"Lekar",
+   d:"Utemeljivač moderne higijene i zdravstvenog prosvećivanja u Srbiji, prvi dekan Medicinskog fakulteta u Beogradu i predsednik [term:sana|SANU]."},
+  {u:"Vase Pelagića", n:"Vasa Pelagić", y:"1833–1899", r:"Prosvetitelj",
+   d:"Srpski prosvetitelj, pisac i socijalista, borac za narodno obrazovanje i zdravlje; njegov „Narodni učitelj“ bio je popularni priručnik za život."},
+  {u:"Emanuila Jankovića", n:"Emanuil Janković", y:"1758–1791", r:"Pisac i prevodilac",
+   d:"Srpski prosvetitelj, prevodilac komedija i jedan od prvih srpskih knjižara; širio je ideje [term:prosvetiteljstvo|prosvetiteljstva] u Novom Sadu."},
+  {u:"Hadži Ruvimova", n:"Hadži Ruvim", y:"1752–1804", r:"Arhimandrit i ustanik",
+   d:"Arhimandrit manastira Bogovađe, prosvetitelj i vešt duborezac, jedan od organizatora [term:prvi-ustanak|Prvog srpskog ustanka]. Bio je prva žrtva [term:seca-knezova|seče knezova] 1804 — mučen i pogubljen, čime je izazvana Buna na dahije."},
+  {u:"Ilariona Ruvarca", n:"Ilarion Ruvarac", y:"1832–1905", r:"Istoričar",
+   d:"Osnivač kritičke srpske istoriografije i akademik, arhimandrit fruškogorskog manastira Grgeteg. Prvi je naučnom kritikom razdvojio istorijske činjenice od epskog predanja, zbog čega je bio na udaru tradicionalista."},
+
+  {u:"Jovana Subotića", n:"Jovan Subotić", y:"1817–1886", r:"Pisac i pravnik",
+   d:"Srpski književnik, pravnik i političar, jedan od najplodnijih pisaca srpskog romantizma i potpredsednik Matice srpske. Pisao je epove, drame i poeziju."},
+  {u:"Jaše Ignjatovića", n:"Jakov Jaša Ignjatović", y:"1822–1889", r:"Pisac",
+   d:"Začetnik realizma u srpskom romanu i najbolji hroničar života Srba u Ugarskoj. Autor romana „Večiti mladoženja“ i „Vasa Rešpekt“."},
+  {u:"Bogoboja Atanackovića", n:"Bogoboj Atanacković", y:"1826–1858", r:"Pisac",
+   d:"Utemeljivač srpske romantičarske novele, autor „Dva idola“ — najvažnijeg romana srpskog romantizma. Jedno vreme je u Novom Sadu radio kao sekretar vladike Platona."},
+  {u:"Milovana Glišića", n:"Milovan Glišić", y:"1847–1908", r:"Pisac",
+   d:"Utemeljivač srpske realističke pripovetke sa selskom tematikom i vrstan prevodilac (Gogolj, Tolstoj). Poznat po pričama „Glava šećera“ i „Prva brazda“."},
+  {u:"Milana Rakića", n:"Milan Rakić", y:"1876–1938", r:"Pesnik i diplomata",
+   d:"Jedan od najvećih srpskih pesnika moderne, poznat po savršenstvu stiha i rodoljubivim „kosovskim“ pesmama. Bio je i ugledni diplomata."},
+  {u:"Danila Kiša", n:"Danilo Kiš", y:"1935–1989", r:"Pisac",
+   d:"Jedan od najznačajnijih srpskih pisaca 20. veka, svetski priznat. Autor „Grobnice za Borisa Davidoviča“, „Bašte, pepela“ i „Enciklopedije mrtvih“."},
+  {u:"Vaska Pope", n:"Vasko Popa", y:"1922–1991", r:"Pesnik",
+   d:"Jedan od najuticajnijih i najprevođenijih srpskih pesnika 20. veka, tvorac modernog pesničkog izraza zasnovanog na mitu i jeziku. Autor ciklusa „Kora“ i „Uspravna zemlja“."},
+  {u:"Aleksandra Tišme", n:"Aleksandar Tišma", y:"1924–2003", r:"Pisac",
+   d:"Novosadski pisac svetskog ugleda, hroničar stradanja u Drugom svetskom ratu. Autor romana „Upotreba čoveka“ i „Knjiga o Blamu“."},
+  {u:"Rastka Petrovića", n:"Rastko Petrović", y:"1898–1949", r:"Pisac",
+   d:"Pesnik, romanopisac i putopisac, jedan od najoriginalnijih pisaca srpskog međuratnog modernizma. Autor romana „Dan šesti“ i „Burleska gospodina Peruna boga groma“."},
+  {u:"Desanke Maksimović", n:"Desanka Maksimović", y:"1898–1993", r:"Pesnikinja",
+   d:"Najvoljenija srpska pesnikinja, autorka zbirke „Tražim pomilovanje“ i čuvene pesme „Krvava bajka“ o streljanim đacima u Kragujevcu."},
+  {u:"Branislava Nušića", n:"Branislav Nušić", y:"1864–1938", r:"Komediograf",
+   d:"Najveći srpski komediograf, čije se komedije i danas najviše igraju. Autor „Sumnjivog lica“, „Gospođe ministarke“, „Ožalošćene porodice“ i „Autobiografije“."},
+  {u:"Milete Protića", n:"Mileta Protić", y:"1927–2003", r:"Pisac",
+   d:"Srpski pesnik i pripovedač iz Vojvodine, autor lirske i rodoljubive poezije."},
+
+  {u:"Antona Čehova", n:"Anton Čehov", y:"1860–1904", r:"Pisac",
+   d:"Ruski pripovedač i dramski pisac, majstor kratke priče i moderne drame. Autor „Ujka Vanje“, „Galeba“ i „Višnjika“."},
+  {u:"Tolstojeva", n:"Lav Tolstoj", y:"1828–1910", r:"Pisac",
+   d:"Jedan od najvećih svetskih romanopisaca. Autor „Rata i mira“ i „Ane Karenjine“, dela koja se smatraju vrhuncima svetske književnosti."},
+  {u:"Dostojevskog", n:"Fjodor Dostojevski", y:"1821–1881", r:"Pisac",
+   d:"Ruski romanopisac i jedan od najvećih pisaca svih vremena, dubinski istraživač ljudske psihe. Autor „Zločina i kazne“ i „Braće Karamazovih“."},
+  {u:"Šekspirova", n:"Vilijam Šekspir", y:"1564–1616", r:"Pisac",
+   d:"Najveći engleski pisac i dramaturg svih vremena. Autor „Hamleta“, „Romea i Julije“, „Magbeta“ i mnogih drugih besmrtnih dela."},
+  {u:"Molijerova", n:"Molijer (Molière)", y:"1622–1673", r:"Komediograf",
+   d:"Najveći francuski komediograf, majstor satirične komedije. Autor „Tartifa“, „Škrca“ i „Građanina plemića“."},
+  {u:"Jesenjinova", n:"Sergej Jesenjin", y:"1895–1925", r:"Pesnik",
+   d:"Jedan od najvoljenijih ruskih lirskih pesnika, poznat po nežnoj poeziji o selu, prirodi i ljubavi. Tragično okončao život mlad."},
+  {u:"Tarasa Ševčenka", n:"Taras Ševčenko", y:"1814–1861", r:"Pesnik i slikar",
+   d:"Najveći ukrajinski pesnik i utemeljivač modernog ukrajinskog jezika, ujedno i slikar; nacionalni simbol Ukrajine."},
+  {u:"Petefi Šandora", n:"Šandor Petefi (Petőfi Sándor)", y:"1823–1849", r:"Pesnik",
+   d:"Najveći mađarski pesnik i nacionalni junak, simbol revolucije 1848. Autor „Nacionalne pesme“; poginuo mlad u borbi."},
+
+  {u:"Nikole Aleksića", n:"Nikola Aleksić", y:"1808–1873", r:"Slikar",
+   d:"Istaknuti srpski slikar bidermajera, autor mnogih portreta i ikonostasa u crkvama Vojvodine."},
+  {u:"Đorđa Krstića", n:"Đorđe Krstić", y:"1851–1907", r:"Slikar",
+   d:"Jedan od najznačajnijih srpskih slikara realizma, poznat po istorijskim kompozicijama i pejzažima."},
+  {u:"Stevana Todorovića", n:"Stevan Todorović", y:"1832–1925", r:"Slikar",
+   d:"Plodan srpski slikar realizma i portretista, aktivan u kulturnom i društvenom životu; oslikao je brojne crkve."},
+  {u:"Marodićeva", n:"Aksentije Marodić", y:"1838–1909", r:"Slikar",
+   d:"Srpski akademski slikar iz Vojvodine, poznat po portretima i crkvenom slikarstvu; poslednje godine proveo u Novom Sadu."},
+  {u:"Pavla Beljanskog", n:"Pavle Beljanski", y:"1892–1965", r:"Diplomata i kolekcionar",
+   d:"Diplomata i veliki kolekcionar umetnosti; svoju zbirku srpskog slikarstva 20. veka zaveštao je Novom Sadu — danas Spomen-zbirka Pavla Beljanskog."},
+  {u:"Rahele Ferari", n:"Rahela Ferari", y:"1911–1994", r:"Glumica",
+   d:"Istaknuta srpska pozorišna i filmska glumica, upamćena po nizu karakternih i komičnih uloga."},
+
+  {u:"Pasterova", n:"Luj Paster (Louis Pasteur)", y:"1822–1895", r:"Naučnik",
+   d:"Francuski hemičar i mikrobiolog, tvorac pasterizacije i vakcine protiv besnila. Jedan od utemeljivača mikrobiologije i moderne medicine."},
+  {u:"Gagarinova", n:"Jurij Gagarin", y:"1934–1968", r:"Kosmonaut",
+   d:"Sovjetski kosmonaut, prvi čovek koji je poleteo u svemir (12. april 1961). Njegov let označio je početak ere svemirskih putovanja."},
+];
+
+const geo = [
+  {u:"Dunavska", d:"Nazvana po reci Dunav; jedna od najstarijih ulica u srcu Starog grada."},
+  {u:"Futoška", d:"Vodi ka obližnjem mestu Futog; duž nje je i poznata Futoška pijaca."},
+  {u:"Temerinska", d:"Put ka mestu Temerin severno od Novog Sada."},
+  {u:"Kisačka", d:"Vodi ka naselju Kisač, poznatom po slovačkoj zajednici."},
+  {u:"Rumenačka", d:"Put prema mestu Rumenka."},
+  {u:"Sremska", d:"Nazvana po regiji Srem, preko puta Dunava."},
+  {u:"Fruškogorska", d:"Po planini Fruškoj gori, nadomak grada."},
+  {u:"Kosovska", d:"Po pokrajini/oblasti Kosovo."},
+  {u:"Partizanska", d:"Po partizanskom pokretu iz Drugog svetskog rata."},
+  {u:"Somborska", d:"Nazvana po pravcu ka gradu Somboru."},
+  {u:"Sentandrejski put", d:"Istorijski put ka Sentandreji kod Budimpešte, važnom srpskom kulturnom središtu."},
+  {u:"Bulevar Evrope", d:"Simbolički naziv, jedna od novijih saobraćajnica grada."},
+  {u:"Narodnog fronta", d:"Po Narodnom frontu, političkom savezu iz sredine 20. veka."},
+  {u:"Kolubarska", d:"Po Kolubarskoj bici 1914 — velikoj srpskoj pobedi nad Austrougarskom u Prvom svetskom ratu, kojom je komandovao vojvoda Živojin Mišić."},
+  {u:"Sutjeska", d:"Po bici na Sutjesci 1943 — jednoj od najvećih i najtežih bitaka partizanskog pokreta u Drugom svetskom ratu."},
+  {u:"Solunska", d:"Po Solunskom frontu iz Prvog svetskog rata, čijim je probojem 1918. oslobođena Srbija."},
+  {u:"Seljačkih buna", d:"Po seljačkim bunama — istorijskim ustancima seljaka protiv feudalnog tlačenja."},
+  {u:"Sremskog dobrovoljačkog odreda", d:"Po dobrovoljačkom odredu iz Srema koji se borio u Drugom svetskom ratu."},
+  {u:"Ribarska", d:"Nazvana po ribarima i ribarstvu — vezana za život uz Dunav."},
+  {u:"Nikolajevska", d:"Po Nikolajevskoj crkvi (Sv. Nikole), jednoj od najstarijih pravoslavnih crkava u Novom Sadu."},
+  {u:"Trg slobode", d:"Centralni gradski trg sa spomenikom Svetozaru Miletiću i Gradskom kućom."},
+  {u:"Trg mladenaca", d:"Trg u Starom gradu, omiljeno okupljalište."},
+];
+
+/* pretvara [term:kljuc|tekst] u klikabilan span */
+function renderTerms(txt){
+  return txt.replace(/\[term:([a-z0-9\-]+)\|([^\]]+)\]/g,
+    (_,k,label)=>`<span class="term" data-term="${k}">${label}</span>`);
+}
+function plain(txt){ return txt.replace(/\[term:[a-z0-9\-]+\|([^\]]+)\]/g,'$1'); }
+
+/* OpenStreetMap pretraga ulice po imenu u Novom Sadu */
+function mapLink(u){
+  let name = u.split('/')[0].trim();      // glavni naziv ako ih je više
+  name = name.replace(/\(.*?\)/g,'').trim();  // izbaci zagrade
+  const q = encodeURIComponent(name + ', Novi Sad, Srbija');
+  return `https://www.openstreetmap.org/search?query=${q}`;
+}
+function mapBtn(u){
+  return `<a class="map-link" href="${mapLink(u)}" target="_blank" rel="noopener" title="Otvori ulicu na mapi">📍 Mapa</a>`;
+}
+
+function card(o, isGeo){
+  if(isGeo){
+    return `<div class="card" data-txt="${(o.u+' '+o.d).toLowerCase()}">
+      <h3>${o.u}</h3><p>${o.d}</p><div class="card-foot">${mapBtn(o.u)}</div></div>`;
+  }
+  return `<div class="card" data-txt="${(o.u+' '+o.n+' '+plain(o.d)+' '+o.r+' '+(o.alt||'')).toLowerCase()}">
+    <h3>${o.n}</h3><div class="years">${o.y} · ${o.u}</div>
+    <p>${renderTerms(o.d)}</p>
+    <div class="card-foot"><span class="role">${o.r}</span>${mapBtn(o.u)}</div></div>`;
+}
+
+document.getElementById('peopleGrid').innerHTML = people.map(o=>card(o,false)).join('');
+document.getElementById('geoGrid').innerHTML = geo.map(o=>card(o,true)).join('');
+
+function openTerm(k){
+  const g=glossary[k]; if(!g)return;
+  document.getElementById('mTitle').textContent=g.t;
+  document.getElementById('mYear').textContent=g.y||'';
+  document.getElementById('mBody').textContent=g.d;
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal(){document.getElementById('overlay').classList.remove('open');}
+
+function filter(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  // dok se pretražuje, sve sekcije moraju biti raširene da bi rezultati bili vidljivi
+  if(q){
+    document.querySelectorAll('.grid').forEach(g=>g.classList.remove('hidden'));
+    document.querySelectorAll('.section-title.toggle').forEach(h=>h.classList.remove('collapsed'));
+  }
+  let shown = 0;
+  document.querySelectorAll('.card').forEach(c=>{
+    const ok = c.dataset.txt.includes(q);
+    c.style.display = ok ? '' : 'none';
+    if(ok) shown++;
+  });
+  document.getElementById('count').textContent = q ? shown+' rezultat(a)' : (people.length+geo.length)+' ulica';
+  document.getElementById('noRes').style.display = shown===0 ? 'block' : 'none';
+  document.getElementById('clearBtn').classList.toggle('show', q.length>0);
+}
+
+/* --- vezivanje događaja (bez inline handlera) --- */
+const searchEl = document.getElementById('search');
+searchEl.addEventListener('input', filter);
+
+// X dugme — briše pretragu
+document.getElementById('clearBtn').addEventListener('click', function(){
+  searchEl.value=''; filter(); searchEl.focus();
+});
+
+// sklapanje/širenje sekcija
+document.querySelectorAll('.section-title.toggle').forEach(function(h){
+  h.addEventListener('click', function(){
+    const grid = document.getElementById(h.dataset.target);
+    grid.classList.toggle('hidden');
+    h.classList.toggle('collapsed');
+  });
+});
+
+// klik na pojam (delegacija — radi i za dinamički ubačene kartice)
+document.body.addEventListener('click', function(e){
+  const t = e.target.closest('.term');
+  if(t && t.dataset.term){ openTerm(t.dataset.term); return; }
+});
+
+// zatvaranje modala
+document.getElementById('closeBtn').addEventListener('click', closeModal);
+document.getElementById('overlay').addEventListener('click', function(e){
+  if(e.target===this) closeModal();
+});
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
+
+filter();
+</script>
+</body>
+</html>
