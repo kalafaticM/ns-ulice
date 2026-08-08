@@ -46,6 +46,28 @@
   #clearBtn:hover{background:var(--accent);color:#fffaf0}
   #clearBtn.show{display:block}
   .count{color:var(--muted);font-size:.9rem}
+  #locBtn{
+    border:1px solid var(--accent);background:var(--accent);color:#fffaf0;
+    padding:10px 16px;border-radius:10px;cursor:pointer;font-size:.95rem;font-weight:600;
+    white-space:nowrap;transition:.15s;
+  }
+  #locBtn:hover{filter:brightness(1.08)}
+  #locBtn:disabled{opacity:.6;cursor:default}
+  .loc-result{
+    max-width:960px;margin:0 auto;padding:0 20px;
+  }
+  .loc-card{
+    background:var(--card);border:1px solid var(--accent);border-left:4px solid var(--accent);
+    border-radius:14px;padding:20px;margin-top:18px;
+    box-shadow:0 6px 20px rgba(120,90,50,.18);
+  }
+  .loc-card .loc-label{font-size:.8rem;color:var(--accent2);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+  .loc-card h3{font-size:1.2rem;color:var(--accent);margin-bottom:2px}
+  .loc-card .years{font-size:.82rem;color:var(--accent2);margin-bottom:10px;font-weight:600}
+  .loc-card p{font-size:.95rem;color:var(--text)}
+  .loc-card .loc-street{font-size:1.05rem;color:var(--text);font-weight:600}
+  .loc-card.info{border-color:var(--line);border-left-color:var(--muted)}
+  .loc-msg{color:var(--muted);font-size:.92rem;margin-top:14px;padding:12px 16px;background:var(--card);border-radius:10px;border:1px solid var(--line)}
   .section-title{
     margin:38px 0 4px;font-size:1.25rem;color:var(--accent);
     border-left:3px solid var(--accent);padding-left:12px;
@@ -123,8 +145,11 @@
     <input id="search" type="text" placeholder="Pretraži ulicu ili ime…" autocomplete="off">
     <button id="clearBtn" type="button" aria-label="Obriši pretragu">✕</button>
   </div>
+  <button id="locBtn" type="button">📍 Gde sam?</button>
   <span class="count" id="count"></span>
 </div>
+
+<div id="locResult" class="loc-result"></div>
 
 <div class="wrap">
   <h2 class="section-title toggle" data-target="peopleGrid">Ulice nazvane po ličnostima <span class="chev">▾</span></h2>
@@ -620,6 +645,95 @@ document.getElementById('overlay').addEventListener('click', function(e){
   if(e.target===this) closeModal();
 });
 document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
+
+/* --- „Gde sam?“ — geolokacija + reverzno geokodiranje preko OpenStreetMap --- */
+function normStreet(s){
+  return (s||'').toLowerCase()
+    .replace(/š/g,'s').replace(/č/g,'c').replace(/ć/g,'c').replace(/ž/g,'z').replace(/đ/g,'dj')
+    .replace(/[.,]/g,'').replace(/\(.*?\)/g,'')
+    .replace(/\b(ulica|bulevar|trg|put|bb)\b/g,'')
+    .replace(/\s+/g,' ').trim();
+}
+function findStreet(osmName){
+  const target = normStreet(osmName);
+  if(!target) return null;
+  const all = people.map(o=>({o,isGeo:false})).concat(geo.map(o=>({o,isGeo:true})));
+  for(const x of all){
+    const base = normStreet(x.o.u.split('/')[0]);
+    const alt = x.o.alt ? normStreet(x.o.alt) : '';
+    if(base===target || (alt && alt===target)) return x;
+  }
+  for(const x of all){
+    const base = normStreet(x.o.u.split('/')[0]);
+    if(base && (base.includes(target) || target.includes(base))) return x;
+  }
+  return null;
+}
+function showLocCard(match, streetName){
+  const box = document.getElementById('locResult');
+  if(!match){
+    box.innerHTML = `<div class="loc-card info">
+      <div class="loc-label">Nalaziš se u ulici</div>
+      <div class="loc-street">${streetName}</div>
+      <p style="margin-top:8px;color:var(--muted)">Ova ulica nije u našoj bazi ličnosti (ili nije nazvana po osobi).</p>
+    </div>`;
+    return;
+  }
+  const o = match.o;
+  if(match.isGeo){
+    box.innerHTML = `<div class="loc-card">
+      <div class="loc-label">Nalaziš se u ulici</div>
+      <h3>${o.u}</h3><p>${o.d}</p>
+      <div style="margin-top:12px">${mapBtn(o.u)}</div>
+    </div>`;
+  } else {
+    box.innerHTML = `<div class="loc-card">
+      <div class="loc-label">Nalaziš se u ulici — ${o.u}</div>
+      <h3>${o.n}</h3><div class="years">${o.y} · ${o.r}</div>
+      <p>${renderTerms(o.d)}</p>
+      <div style="margin-top:12px">${mapBtn(o.u)}</div>
+    </div>`;
+  }
+  box.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+function whereAmI(){
+  const box = document.getElementById('locResult');
+  const btn = document.getElementById('locBtn');
+  if(!navigator.geolocation){
+    box.innerHTML = `<div class="loc-msg">Tvoj uređaj ne podržava geolokaciju.</div>`;
+    return;
+  }
+  box.innerHTML = `<div class="loc-msg">Tražim tvoju lokaciju…</div>`;
+  btn.disabled = true;
+  navigator.geolocation.getCurrentPosition(function(pos){
+    const lat = pos.coords.latitude, lon = pos.coords.longitude;
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=17&addressdetails=1`;
+    fetch(url, {headers:{'Accept':'application/json'}})
+      .then(r=>r.json())
+      .then(data=>{
+        const a = data.address || {};
+        const street = a.road || a.pedestrian || a.footway || a.residential || a.path || '';
+        const city = a.city || a.town || a.village || a.municipality || '';
+        if(!street){
+          box.innerHTML = `<div class="loc-msg">Nisam uspeo da odredim ulicu na tvojoj lokaciji. Probaj ponovo napolju, sa uključenim GPS-om.</div>`;
+        } else {
+          showLocCard(findStreet(street), street + (city?', '+city:''));
+        }
+      })
+      .catch(()=>{
+        box.innerHTML = `<div class="loc-msg">Greška pri povezivanju sa servisom za mape. Proveri internet i probaj ponovo.</div>`;
+      })
+      .finally(()=>{ btn.disabled=false; });
+  }, function(err){
+    btn.disabled = false;
+    let msg = 'Nisam mogao da dobijem lokaciju.';
+    if(err.code===1) msg = 'Pristup lokaciji je odbijen. Dozvoli lokaciju u podešavanjima pregledača i probaj ponovo.';
+    else if(err.code===2) msg = 'Lokacija trenutno nije dostupna. Probaj ponovo napolju.';
+    else if(err.code===3) msg = 'Isteklo je vreme za određivanje lokacije. Probaj ponovo.';
+    box.innerHTML = `<div class="loc-msg">${msg}</div>`;
+  }, {enableHighAccuracy:true, timeout:10000, maximumAge:0});
+}
+document.getElementById('locBtn').addEventListener('click', whereAmI);
 
 filter();
 </script>
