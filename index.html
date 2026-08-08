@@ -66,6 +66,7 @@
   .loc-card .years{font-size:.82rem;color:var(--accent2);margin-bottom:10px;font-weight:600}
   .loc-card p{font-size:.95rem;color:var(--text)}
   .loc-card .loc-street{font-size:1.05rem;color:var(--text);font-weight:600}
+  .loc-card .loc-adr{font-size:.9rem;color:var(--accent2);font-weight:600;margin:6px 0 4px}
   .loc-card.info{border-color:var(--line);border-left-color:var(--muted)}
   .loc-msg{color:var(--muted);font-size:.92rem;margin-top:14px;padding:12px 16px;background:var(--card);border-radius:10px;border:1px solid var(--line)}
   .section-title{
@@ -669,12 +670,14 @@ function findStreet(osmName){
   }
   return null;
 }
-function showLocCard(match, streetName){
+function showLocCard(match, streetName, adresa){
   const box = document.getElementById('locResult');
+  const adrLine = adresa ? `<div class="loc-adr">📍 ${adresa}</div>` : '';
   if(!match){
     box.innerHTML = `<div class="loc-card info">
       <div class="loc-label">Nalaziš se u ulici</div>
       <div class="loc-street">${streetName}</div>
+      ${adrLine}
       <p style="margin-top:8px;color:var(--muted)">Ova ulica nije u našoj bazi ličnosti (ili nije nazvana po osobi).</p>
     </div>`;
     return;
@@ -683,13 +686,14 @@ function showLocCard(match, streetName){
   if(match.isGeo){
     box.innerHTML = `<div class="loc-card">
       <div class="loc-label">Nalaziš se u ulici</div>
-      <h3>${o.u}</h3><p>${o.d}</p>
+      <h3>${o.u}</h3>${adrLine}<p>${o.d}</p>
       <div style="margin-top:12px">${mapBtn(o.u)}</div>
     </div>`;
   } else {
     box.innerHTML = `<div class="loc-card">
       <div class="loc-label">Nalaziš se u ulici — ${o.u}</div>
       <h3>${o.n}</h3><div class="years">${o.y} · ${o.r}</div>
+      ${adrLine}
       <p>${renderTerms(o.d)}</p>
       <div style="margin-top:12px">${mapBtn(o.u)}</div>
     </div>`;
@@ -713,11 +717,18 @@ function whereAmI(){
       .then(data=>{
         const a = data.address || {};
         const street = a.road || a.pedestrian || a.footway || a.residential || a.path || '';
+        const house = a.house_number || '';
         const city = a.city || a.town || a.village || a.municipality || '';
+        const postcode = a.postcode || '';
+        // puna adresa: „Ulica 12, 21000 Novi Sad"
+        let adresa = street;
+        if(house) adresa += ' ' + house;
+        const gradDeo = [postcode, city].filter(Boolean).join(' ');
+        if(gradDeo) adresa += (adresa?', ':'') + gradDeo;
         if(!street){
           box.innerHTML = `<div class="loc-msg">Nisam uspeo da odredim ulicu na tvojoj lokaciji. Probaj ponovo napolju, sa uključenim GPS-om.</div>`;
         } else {
-          showLocCard(findStreet(street), street + (city?', '+city:''));
+          showLocCard(findStreet(street), street, adresa);
         }
       })
       .catch(()=>{
