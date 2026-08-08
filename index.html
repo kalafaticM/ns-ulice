@@ -676,8 +676,7 @@ function showLocCard(match, streetName, adresa){
   if(!match){
     box.innerHTML = `<div class="loc-card info">
       <div class="loc-label">Nalaziš se u ulici</div>
-      <div class="loc-street">${streetName}</div>
-      ${adrLine}
+      <div class="loc-street">${adresa || streetName}</div>
       <p style="margin-top:8px;color:var(--muted)">Ova ulica nije u našoj bazi ličnosti (ili nije nazvana po osobi).</p>
     </div>`;
     return;
@@ -718,13 +717,8 @@ function whereAmI(){
         const a = data.address || {};
         const street = a.road || a.pedestrian || a.footway || a.residential || a.path || '';
         const house = a.house_number || '';
-        const city = a.city || a.town || a.village || a.municipality || '';
-        const postcode = a.postcode || '';
-        // puna adresa: „Ulica 12, 21000 Novi Sad"
-        let adresa = street;
-        if(house) adresa += ' ' + house;
-        const gradDeo = [postcode, city].filter(Boolean).join(' ');
-        if(gradDeo) adresa += (adresa?', ':'') + gradDeo;
+        // adresu prikazujemo samo ako ima kućni broj (ulica je ionako naslov kartice)
+        const adresa = house ? (street + ' ' + house) : '';
         if(!street){
           box.innerHTML = `<div class="loc-msg">Nisam uspeo da odredim ulicu na tvojoj lokaciji. Probaj ponovo napolju, sa uključenim GPS-om.</div>`;
         } else {
