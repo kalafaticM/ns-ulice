@@ -6,19 +6,19 @@
 <title>Ulice Novog Sada — ličnosti, događaji i institucije</title>
 <style>
   :root{
-    --bg:#0f1720; --card:#182430; --card2:#1e2c3a; --accent:#e0a458;
-    --accent2:#7fb2d9; --text:#e8edf2; --muted:#9fb0bf; --line:#2a3a49;
+    --bg:#2b1f17; --card:#3a2a1e; --card2:#4a3626; --accent:#e8a13c;
+    --accent2:#c17d4a; --text:#f3e7d6; --muted:#c2a88a; --line:#5a4230;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
     font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
-    background:linear-gradient(160deg,#0f1720,#131e29);
+    background:linear-gradient(160deg,#2b1f17,#241a12);
     color:var(--text); line-height:1.6; padding:0 0 60px;
   }
   header{
     padding:48px 24px 32px; text-align:center;
     border-bottom:1px solid var(--line);
-    background:radial-gradient(ellipse at top,#1c2a38,transparent 70%);
+    background:radial-gradient(ellipse at top,#4a3626,transparent 70%);
   }
   header h1{font-size:1.9rem;font-weight:700;letter-spacing:.3px}
   header h1 span{color:var(--accent)}
@@ -27,7 +27,7 @@
   .wrap{max-width:960px;margin:0 auto;padding:0 20px}
   .controls{
     position:sticky;top:0;z-index:20;
-    background:rgba(15,23,32,.92);backdrop-filter:blur(8px);
+    background:rgba(43,31,23,.94);backdrop-filter:blur(8px);
     padding:18px 20px;border-bottom:1px solid var(--line);
     display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;
   }
@@ -75,7 +75,7 @@
   .card-foot:only-child,.geo .card-foot{justify-content:flex-end}
   .map-link{
     font-size:.78rem;color:var(--accent);text-decoration:none;
-    background:rgba(224,164,88,.12);border:1px solid var(--accent);
+    background:rgba(232,161,60,.14);border:1px solid var(--accent);
     padding:4px 12px;border-radius:20px;white-space:nowrap;transition:.15s;
   }
   .map-link:hover{background:var(--accent);color:#1a1206}
@@ -91,7 +91,7 @@
   /* modal */
   .overlay{
     display:none;position:fixed;inset:0;z-index:100;
-    background:rgba(6,10,14,.75);backdrop-filter:blur(4px);
+    background:rgba(20,13,8,.78);backdrop-filter:blur(4px);
     align-items:center;justify-content:center;padding:20px;
   }
   .overlay.open{display:flex}
@@ -114,7 +114,7 @@
 <body>
 <header>
   <h1>Ulice <span>Novog Sada</span></h1>
-  <p>Ko su ljudi po kojima su nazvane ulice grada, a plavo podvučene reči (događaji, bitke, institucije) klikni da vidiš objašnjenje. Svaka kartica ima i dugme 📍 Mapa koje otvara tačnu lokaciju ulice.</p>
+  <p>Ko su ljudi po kojima su nazvane ulice grada, a podvučene reči (događaji, bitke, institucije) klikni da vidiš objašnjenje. Svaka kartica ima i dugme 📍 Mapa koje otvara tačnu lokaciju ulice.</p>
   <div class="hint">💡 Klikni na bilo koji <span class="term" style="cursor:default">pojam</span> u tekstu za kratko objašnjenje.</div>
 </header>
 
@@ -195,6 +195,9 @@ const glossary = {
   "balkanski-ratovi":{t:"Balkanski ratovi",y:"1912–1913.",d:"Dva rata u kojima su balkanske države oslobodile teritorije od Osmanskog carstva, a potom se sukobile oko podele. Srbija je znatno proširila teritoriju."},
   "prvi-ustanak":{t:"Prvi srpski ustanak",y:"1804–1813.",d:"Ustanak Srba protiv osmanske vlasti pod vođstvom Karađorđa Petrovića. Prva faza srpske revolucije koja je vodila stvaranju moderne srpske države."},
   "seca-knezova":{t:"Seča knezova",y:"januar 1804.",d:"Pogubljenje viđenijih srpskih knezova i vođa koje su sprovele dahije, plašeći se pobune. Umesto da uguši otpor, izazvala je Bunu na dahije i Prvi srpski ustanak."},
+  "cegar":{t:"Boj na Čegru",y:"31. maj 1809.",d:"Bitka Prvog srpskog ustanka na brdu Čegar kod Niša. Kad su Turci probili šanac, vojvoda Sinđelić je opalio u barut i digao sve u vazduh. Od stradalih srpskih glava Turci su sazidali Ćele-kulu, koja je postala simbol otpora."},
+  "crveni-krst":{t:"Crveni krst Srbije",y:"osnovan 1876.",d:"Humanitarna organizacija za pomoć ranjenima i ugroženima, jedno od najstarijih nacionalnih društava Crvenog krsta na svetu. Osnovao ga je Vladan Đorđević."},
+  "jovina-gimnazija":{t:"Gimnazija „Jovan Jovanović Zmaj“",y:"osnovana 1810.",d:"Najstarija gimnazija u Novom Sadu, poznata kao „Jovina gimnazija“. Kroz nju su prošli mnogi velikani srpske kulture; njena raskošna zgrada iz 1900. jedno je od najlepših zdanja u gradu."},
 };
 
 /* ---- LIČNOSTI ---- opisi koriste [term:kljuc|prikazani tekst] za pojmove ---- */
@@ -456,6 +459,50 @@ const people = [
    d:"Francuski hemičar i mikrobiolog, tvorac pasterizacije i vakcine protiv besnila. Jedan od utemeljivača mikrobiologije i moderne medicine."},
   {u:"Gagarinova", n:"Jurij Gagarin", y:"1934–1968", r:"Kosmonaut",
    d:"Sovjetski kosmonaut, prvi čovek koji je poleteo u svemir (12. april 1961). Njegov let označio je početak ere svemirskih putovanja."},
+  {u:"Sinđelićeva", n:"Stevan Sinđelić", y:"1770–1809", r:"Vojvoda i junak",
+   d:"Resavski vojvoda u [term:prvi-ustanak|Prvom srpskom ustanku] i jedan od najvećih srpskih junaka. U [term:cegar|boju na Čegru] 1809, da ne bi pao Turcima u ruke, opalio je u barutanu i digao u vazduh sebe, šanac i napadače. Njegovo ime je među Srbima postalo sinonim za junaka."},
+  {u:"Vladana Đorđevića", n:"Vladan Đorđević", y:"1844–1930", r:"Lekar i državnik",
+   d:"Prvi školovani hirurg u Srbiji, književnik i predsednik vlade Kraljevine Srbije. Osnivač [term:crveni-krst|Crvenog krsta Srbije] i Srpskog lekarskog društva; utemeljivač modernog srpskog vojnog saniteta."},
+  {u:"Branka Bajića", n:"Branko Bajić", y:"1912–1942", r:"Narodni heroj",
+   d:"Komunistički revolucionar i [term:narodni-heroj|narodni heroj]. Poginuo je 1942. u Novom Sadu braneći bazu Pokrajinskog komiteta KPJ za Vojvodinu, pruživši oružani otpor policiji."},
+  {u:"Krilova", n:"Ivan Krilov", y:"1769–1844", r:"Basnopisac",
+   d:"Najpoznatiji ruski basnopisac, čije su basne postale deo narodnog govora. Njegove pouke o ljudskim manama i danas se citiraju širom slovenskog sveta."},
+  {u:"Save Vukovića", n:"Sava Vuković od Bereksova", y:"1751–1810", r:"Trgovac i dobrotvor",
+   d:"Novosadski trgovac i veliki dobrotvor. Iako slep i teško bolestan, darovnim pismom je 1810. poklonio 20.000 forinti za osnivanje srpske gimnazije u Novom Sadu — današnje [term:jovina-gimnazija|Jovine gimnazije]. Njegov primer podstakao je druge građane da prilože još."},
+  {u:"Miloša Bajića", n:"Baron Miloš Bajić", y:"1805–1898", r:"Baron i dobrotvor",
+   d:"Veleposednik i dobrotvor, unuk kneza Miloša Obrenovića. Njegovim sredstvima (poklonio je 200.000 kruna) podignuta je 1900. današnja zgrada [term:jovina-gimnazija|Jovine gimnazije], remek-delo novosadske arhitekture."},
+  {u:"Dragiše Brašovana", n:"Dragiša Brašovan", y:"1887–1965", r:"Arhitekta",
+   d:"Jedan od najznačajnijih srpskih arhitekata i začetnik moderne arhitekture na ovim prostorima, dopisni član SANU. U Novom Sadu je projektovao zgradu Radničke komore i zgradu Banovine (danas Vlada Vojvodine)."},
+  {u:"Daničićeva", n:"Đura Daničić", y:"1825–1882", r:"Jezikoslovac",
+   d:"Rođen u Novom Sadu, najbliži saradnik [term:vuk|Vuka Karadžića] i najveći srpski filolog 19. veka. Uredio je veliki „Rječnik“ JAZU i utvrdio naučne temelje srpskog jezika i pravopisa."},
+  {u:"Natoševićeva", n:"Đorđe Natošević", y:"1821–1887", r:"Lekar i pedagog",
+   d:"Lekar po struci i jedan od prvih srpskih pedagoga, reformator srpskog školstva u Ugarskoj. Pokrenuo je prve srpske pedagoške i dečje listove i osnivao učiteljske škole."},
+  {u:"Dr Đorđa Joanovića", n:"Đorđe Joanović", y:"1871–1932", r:"Lekar i naučnik",
+   d:"Osnivač prvog patoanatomskog instituta u Srbiji i jedan od pionira onkologije i imunologije kod nas. Redovni profesor Medicinskog fakulteta u Beogradu i dopisni član Akademije."},
+  {u:"Dr Laze Stanojevića", n:"Laza Stanojević", y:"1846–1935", r:"Lekar",
+   d:"Istaknuti srpski lekar iz 19. veka i jedan od pionira moderne medicine u Vojvodini."},
+  {u:"Jovana Boškovića", n:"Jovan Bošković", y:"1834–1892", r:"Filolog",
+   d:"Rođen u Novom Sadu, srpski filolog, profesor i političar; jedan od utemeljivača srpske jezičke nauke i bibliotekarstva."},
+  {u:"Georgija Magaraševića", n:"Georgije Magarašević", y:"1793–1830", r:"Pisac i profesor",
+   d:"Profesor i pisac, pokretač „Letopisa Matice srpske“ 1824 — najstarijeg književnog časopisa na svetu koji i danas izlazi. Time je udario temelj osnivanju [term:matica-srpska|Matice srpske]."},
+  {u:"Filipa Višnjića", n:"Filip Višnjić", y:"1767–1834", r:"Guslar i pesnik",
+   d:"Slepi guslar i narodni pesnik, „srpski Homer“. Njegove pesme o [term:prvi-ustanak|Prvom srpskom ustanku] („Početak bune protiv dahija“) zapisao je Vuk Karadžić."},
+  {u:"Dušana Vasiljeva", n:"Dušan Vasiljev", y:"1900–1924", r:"Pesnik",
+   d:"Jedan od najvećih srpskih ekspresionista, iako je živeo samo 24 godine. Najpoznatiji po antiratnoj pesmi „Čovek peva posle rata“, koja je izrazila razočaranje generacije posle Prvog svetskog rata."},
+  {u:"Milenka Grčića", n:"Jovan Grčić Milenko", y:"1846–1875", r:"Pesnik i lekar",
+   d:"Srpski pesnik i lekar romantizma, pohađao gimnaziju u Novom Sadu. Pseudonim „Milenko“ uzeo je po Mileni, mladalačkoj ljubavi; pisao je nežnu liriku i fantastične pripovetke. Umro mlad."},
+  {u:"Dr Jovana Andrejevića", n:"Jovan Andrejević Joles", y:"1833–1864", r:"Lekar i naučnik",
+   d:"Lekar, anatom i slikar, prvi Srbin koji je napisao naučno delo iz anatomije. Bio je i pesnik i prevodilac; umro veoma mlad, sa svega 31 godinom."},
+  {u:"Dr Sime Miloševića", n:"Sima Milošević", y:"1886–1942", r:"Lekar i naučnik",
+   d:"Istaknuti srpski lekar, mikrobiolog i naučnik, profesor univerziteta. Stradao je 1942. kao žrtva fašističkog terora."},
+  {u:"Dr Milana Petrovića", n:"Milan Petrović", y:"1879–1952", r:"Profesor i predsednik MS",
+   d:"Dugogodišnji profesor novosadske [term:jovina-gimnazija|Jovine gimnazije] (latinski, grčki, srpski) i predsednik [term:matica-srpska|Matice srpske] od 1946. do smrti. Doktor filologije."},
+  {u:"Dr Svetislava Kasapinovića", n:"Svetislav Kasapinović", y:"1839–1922", r:"Advokat i političar",
+   d:"Srpski advokat i političar iz Banata, blizak prijatelj Laze Kostića i Antonija Hadžića. Odlučno se suprotstavljao mađarizaciji i germanizaciji Srba u Ugarskoj."},
+  {u:"Milana Savića", n:"Milan Savić", y:"1845–1930", r:"Lekar i književnik",
+   d:"Srpski lekar, književnik i prevodilac, predsednik [term:matica-srpska|Matice srpske] (1896–1911). Proslavio se prevodom Geteovog „Fausta“ na srpski jezik."},
+  {u:"Boška Petrovića", n:"Boško Petrović", y:"1915–2001", r:"Pisac",
+   d:"Srpski romansijer, pesnik i prevodilac, sekretar i predsednik [term:matica-srpska|Matice srpske]. Prevodio je nemačke klasike (Tomas Man, Remark, Rilke, Breht) na srpski."},
 ];
 
 const geo = [
@@ -479,6 +526,7 @@ const geo = [
   {u:"Sremskog dobrovoljačkog odreda", d:"Po dobrovoljačkom odredu iz Srema koji se borio u Drugom svetskom ratu."},
   {u:"Ribarska", d:"Nazvana po ribarima i ribarstvu — vezana za život uz Dunav."},
   {u:"Nikolajevska", d:"Po Nikolajevskoj crkvi (Sv. Nikole), jednoj od najstarijih pravoslavnih crkava u Novom Sadu."},
+  {u:"Pariske komune", d:"Po Pariskoj komuni iz 1871 — prvoj radničkoj vlasti u istoriji, koja je nakratko upravljala Parizom pre nego što je ugušena."},
   {u:"Trg slobode", d:"Centralni gradski trg sa spomenikom Svetozaru Miletiću i Gradskom kućom."},
   {u:"Trg mladenaca", d:"Trg u Starom gradu, omiljeno okupljalište."},
 ];
