@@ -6,19 +6,19 @@
 <title>Ulice Novog Sada — ličnosti, događaji i institucije</title>
 <style>
   :root{
-    --bg:#2b1f17; --card:#3a2a1e; --card2:#4a3626; --accent:#e8a13c;
-    --accent2:#c17d4a; --text:#f3e7d6; --muted:#c2a88a; --line:#5a4230;
+    --bg:#f4ecdd; --card:#fffaf0; --card2:#f0e6d2; --accent:#a8742a;
+    --accent2:#8c5a3c; --text:#33291d; --muted:#7a6a54; --line:#ddceb5;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
     font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
-    background:linear-gradient(160deg,#2b1f17,#241a12);
+    background:linear-gradient(160deg,#f4ecdd,#ece0c9);
     color:var(--text); line-height:1.6; padding:0 0 60px;
   }
   header{
     padding:48px 24px 32px; text-align:center;
     border-bottom:1px solid var(--line);
-    background:radial-gradient(ellipse at top,#4a3626,transparent 70%);
+    background:radial-gradient(ellipse at top,#fbf3e2,transparent 70%);
   }
   header h1{font-size:1.9rem;font-weight:700;letter-spacing:.3px}
   header h1 span{color:var(--accent)}
@@ -27,7 +27,7 @@
   .wrap{max-width:960px;margin:0 auto;padding:0 20px}
   .controls{
     position:sticky;top:0;z-index:20;
-    background:rgba(43,31,23,.94);backdrop-filter:blur(8px);
+    background:rgba(244,236,221,.94);backdrop-filter:blur(8px);
     padding:18px 20px;border-bottom:1px solid var(--line);
     display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;
   }
@@ -43,7 +43,7 @@
     display:none;border:none;background:var(--card2);color:var(--muted);
     width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:.85rem;line-height:1;
   }
-  #clearBtn:hover{background:var(--accent);color:#1a1206}
+  #clearBtn:hover{background:var(--accent);color:#fffaf0}
   #clearBtn.show{display:block}
   .count{color:var(--muted);font-size:.9rem}
   .section-title{
@@ -60,7 +60,7 @@
     background:var(--card);border:1px solid var(--line);border-radius:14px;
     padding:20px;transition:.18s;
   }
-  .card:hover{transform:translateY(-3px);border-color:var(--accent2);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+  .card:hover{transform:translateY(-3px);border-color:var(--accent2);box-shadow:0 8px 24px rgba(120,90,50,.18)}
   .card h3{font-size:1.12rem;color:var(--accent);margin-bottom:2px}
   .card .years{font-size:.82rem;color:var(--accent2);margin-bottom:10px;font-weight:600}
   .card p{color:var(--text);font-size:.94rem}
@@ -75,10 +75,10 @@
   .card-foot:only-child,.geo .card-foot{justify-content:flex-end}
   .map-link{
     font-size:.78rem;color:var(--accent);text-decoration:none;
-    background:rgba(232,161,60,.14);border:1px solid var(--accent);
+    background:rgba(168,116,42,.10);border:1px solid var(--accent);
     padding:4px 12px;border-radius:20px;white-space:nowrap;transition:.15s;
   }
-  .map-link:hover{background:var(--accent);color:#1a1206}
+  .map-link:hover{background:var(--accent);color:#fffaf0}
   .geo p{color:var(--muted)}
   /* pojam (glossary term) */
   .term{
@@ -91,13 +91,13 @@
   /* modal */
   .overlay{
     display:none;position:fixed;inset:0;z-index:100;
-    background:rgba(20,13,8,.78);backdrop-filter:blur(4px);
+    background:rgba(51,41,29,.55);backdrop-filter:blur(4px);
     align-items:center;justify-content:center;padding:20px;
   }
   .overlay.open{display:flex}
   .modal{
     background:var(--card2);border:1px solid var(--accent2);border-radius:16px;
-    max-width:520px;width:100%;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.6);
+    max-width:520px;width:100%;padding:28px;box-shadow:0 20px 60px rgba(80,60,35,.25);
     animation:pop .18s ease;
   }
   @keyframes pop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
@@ -105,7 +105,7 @@
   .modal .m-year{color:var(--accent2);font-size:.85rem;font-weight:600;margin-bottom:14px}
   .modal p{font-size:.98rem;color:var(--text)}
   .modal button{
-    margin-top:20px;background:var(--accent);color:#1a1206;border:none;
+    margin-top:20px;background:var(--accent);color:#fffaf0;border:none;
     padding:10px 20px;border-radius:8px;font-weight:600;cursor:pointer;font-size:.95rem;
   }
   .modal button:hover{filter:brightness(1.1)}
